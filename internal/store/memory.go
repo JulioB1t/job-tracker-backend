@@ -34,6 +34,7 @@ func (s *MemoryApplicationStore) Create(app domain.Application) domain.Applicati
 		app.CurrentStatus = domain.StatusSaved
 	}
 
+	normalizeApplication(&app)
 	s.apps[app.ID] = app
 
 	initialTransition := domain.StatusTransition{
@@ -68,6 +69,30 @@ func (s *MemoryApplicationStore) Get(id string) (domain.Application, error) {
 	if !ok {
 		return domain.Application{}, domain.ErrApplicationNotFound
 	}
+
+	return app, nil
+}
+
+func (s *MemoryApplicationStore) Update(id string, app domain.Application) (domain.Application, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	existing, ok := s.apps[id]
+	if !ok {
+		return domain.Application{}, domain.ErrApplicationNotFound
+	}
+
+	now := time.Now().UTC()
+	app.ID = existing.ID
+	app.CreatedAt = existing.CreatedAt
+	app.UpdatedAt = now
+
+	if app.CurrentStatus == "" {
+		app.CurrentStatus = domain.StatusSaved
+	}
+
+	normalizeApplication(&app)
+	s.apps[id] = app
 
 	return app, nil
 }
@@ -109,4 +134,10 @@ func (s *MemoryApplicationStore) ListTransitions(applicationID string) ([]domain
 	}
 
 	return s.transitions[applicationID], nil
+}
+
+func normalizeApplication(app *domain.Application) {
+	if app.Salary != nil && app.Salary.Currency == "" {
+		app.Salary.Currency = "USD"
+	}
 }

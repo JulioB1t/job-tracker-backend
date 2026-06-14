@@ -1,0 +1,24 @@
+# Go build and test artifacts
+bin/
+*.exe
+*.test
+*.out
+coverage.out
+
+# Local Go cache used during development
+.gocache/
+
+# Dependency workspace files
+vendor/
+go.work
+go.work.sum
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
